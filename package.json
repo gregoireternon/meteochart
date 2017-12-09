@@ -1,0 +1,25 @@
+{
+  "name": "meteochart",
+  "version": "1.0.0",
+  "description": "A simple d3 project to display rtl433 thermometer probe results",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+	"start": "node serve.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gregoireternon/meteochart.git"
+  },
+  "keywords": [
+    "d2",
+    "responsive",
+    "chart"
+  ],
+  "author": "Gregoire Ternon",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gregoireternon/meteochart/issues"
+  },
+  "homepage": "https://github.com/gregoireternon/meteochart#readme"
+}
