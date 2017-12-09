@@ -1,42 +1,40 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <style>
+  body {
+    font: 10px sans-serif;
+  }
 
-body {
-  font: 10px sans-serif;
-}
+  .axis path,
+  .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+  }
 
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
+  .line {
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 2px;
+  }
 
-.line {
-  fill: none;
-  stroke: steelblue;
-  stroke-width: 2px;
-}
-
-#chart {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-}
-
+  #chart {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+  }
 </style>
 
 <body>
-<svg id="chart"></svg>
-	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-  <script src="http://d3js.org/d3.v3.js"> </script>
+  <svg id="chart"></svg>
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script src="http://d3js.org/d3.v3.js"></script>
   <script>
 
     // Define margins
-    var margin = {top: 20, right: 80, bottom: 30, left: 50},
-    width = parseInt(d3.select("#chart").style("width")) - margin.left - margin.right,
-    height = parseInt(d3.select("#chart").style("height")) - margin.top - margin.bottom;
+    var margin = { top: 20, right: 80, bottom: 30, left: 50 },
+      width = parseInt(d3.select("#chart").style("width")) - margin.left - margin.right,
+      height = parseInt(d3.select("#chart").style("height")) - margin.top - margin.bottom;
 
     // Define date parser
     var parseDate = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
@@ -45,7 +43,7 @@ body {
     var xScale = d3.time.scale().range([0, width]);
     var yScale = d3.scale.linear().range([height, 0]);
     var color = d3.scale.ordinal()
-          .range(["#CD2600", "#172282", "#35978f"]);
+      .range(["#CD2600", "#172282", "#35978f"]);
 
     // Define axes
     var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
@@ -53,143 +51,147 @@ body {
 
     // Define lines
     var line = d3.svg.line().interpolate("basis")
-                .x(function(d) { return xScale(d["date"]); })
-                .y(function(d) { return yScale(d["concentration"]); });
+      .x(function (d) { return xScale(d["date"]); })
+      .y(function (d) { return yScale(d["concentration"]); });
 
     // Define svg canvas
     var svg = d3.select("#chart")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-                .append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     // Read in data
-$(document).ready(function(){
-	var d = new Date();
-	var mFormat = d3.time.format("%Y%m%d");
-	
-	var oneFileContent = function(toto){
-		return 
-	};
-	
-	
-	var wholeContent = [];
-	var currentDate = new Date();
-	var minDate = new Date();
-	minDate.setDate(minDate.getDate()-4);
-	
-	loadDay = function(datez){
-		var mFormat = d3.time.format("%Y%m%d");
-		$.ajax({
-			url:'./results/meteo'+mFormat(datez)+'.json',
-			accepts:{
-				objectsReturnSeparator:'application-returnsep'
-			},
-			converters: {
-			    'text objectsReturnSeparator': function(result) {
-			      // Do Stuff
-			    	var resStr = result.split('\n');
-			    	var res = [];
-			    	try{
-				    	for( i=0;i<resStr.length;i++){
-				    		var o = JSON.parse(resStr[i]);
-				    		
-				    		//delete o.id;
-				    		delete o.battery;
-				    		delete o.test;
-				    		o.temperature = (o.temperature-32)/1.8;
-				    		res.push(o);
-				    	}
-			    	}catch(e){
-			    		console.log(e);
-			    	}
-			    	wholeContent =  wholeContent.concat(res);
-			      return res;
-			    }
-			  },
-			dataType: 'objectsReturnSeparator',
-			success: function(a,b,c){
-				var otherDatez = new Date(datez.getTime());
-				otherDatez.setDate(otherDatez.getDate()-1);
-				if(otherDatez.getTime()<minDate.getTime()){
-					renderDates(a,b);
-				}else{
-					loadDay(otherDatez);
-				}
-			},
-			error: function(a,b,c){
-				renderDates(a,b);
-			}
-		});
-	};
-	loadDay(currentDate);
-	
-	var renderDates = function(a,b){
-		wholeContent.sort(function(a,b){
-			return parseDate(a["time"]) - parseDate(b["time"]);
-		});
-		applyStats(wholeContent);
-	};
-			
-});
+    $(document).ready(function () {
+      var d = new Date();
+      var mFormat = d3.time.format("%Y%m%d");
 
-applyStats = function(data){
-    // Set the color domain equal to the three product categories
-    var productCategories = d3.keys(data[0]).filter(function(key){return (key !== "time") && (key !== "model")})
-    color.domain(productCategories);
+      var oneFileContent = function (toto) {
+        return
+      };
 
-    // console.log(JSON.stringify(data, null, 2)) // to view the structure
 
-    // Format the data field
+      var wholeContent = [];
+      var currentDate = new Date();
+      var minDate = new Date();
+      minDate.setDate(minDate.getDate() - 4);
 
-    // Filter the data to only include a single metric
-    
-    var minValue=null;
-    var maxValue = null;
-    var subset = data.filter(function(el) {return (el.model === "LaCrosse TX141TH-Bv2 sensor"
-    		&& el.id===69) });
-    subset.forEach(function(d){
+      loadDay = function (datez) {
+        var mFormat = d3.time.format("%Y%m%d");
+        $.ajax({
+          url: './results/meteo' + mFormat(datez) + '.json',
+          accepts: {
+            objectsReturnSeparator: 'application-returnsep'
+          },
+          converters: {
+            'text objectsReturnSeparator': function (result) {
+              // Do Stuff
+              var resStr = result.split('\n');
+              var res = [];
+              try {
+                for (i = 0; i < resStr.length; i++) {
+                  var o = JSON.parse(resStr[i]);
+
+                  //delete o.id;
+                  delete o.battery;
+                  delete o.test;
+                  o.temperature = (o.temperature - 32) / 1.8;
+                  res.push(o);
+                }
+              } catch (e) {
+                console.log(e);
+              }
+              wholeContent = wholeContent.concat(res);
+              return res;
+            }
+          },
+          dataType: 'objectsReturnSeparator',
+          success: function (a, b, c) {
+            var otherDatez = new Date(datez.getTime());
+            otherDatez.setDate(otherDatez.getDate() - 1);
+            if (otherDatez.getTime() < minDate.getTime()) {
+              renderDates(a, b);
+            } else {
+              loadDay(otherDatez);
+            }
+          },
+          error: function (a, b, c) {
+            renderDates(a, b);
+          }
+        });
+      };
+      loadDay(currentDate);
+
+      var renderDates = function (a, b) {
+        wholeContent.sort(function (a, b) {
+          return parseDate(a["time"]) - parseDate(b["time"]);
+        });
+        applyStats(wholeContent);
+      };
+
+    });
+
+    applyStats = function (data) {
+      // Set the color domain equal to the three product categories
+      var productCategories = d3.keys(data[0]).filter(function (key) { return (key !== "time") && (key !== "model") })
+      color.domain(productCategories);
+
+      // console.log(JSON.stringify(data, null, 2)) // to view the structure
+
+      // Format the data field
+
+      // Filter the data to only include a single metric
+
+      var minValue = null;
+      var maxValue = null;
+      var subset = data.filter(function (el) {
+        return (el.model === "LaCrosse TX141TH-Bv2 sensor"
+          && el.id === 69)
+      });
+      subset.forEach(function (d) {
         d["time"] = parseDate(d["time"]);
         delete d.id;
-        if(!minValue){
-        	minValue = d.temperature;
-        }else{
-        	if(minValue>d.temperature) minValue = d.temperature;
+        if (!minValue) {
+          minValue = d.temperature;
+        } else {
+          if (minValue > d.temperature) minValue = d.temperature;
         }
-        if(!maxValue){
-        	maxValue = d.temperature;
-        }else{
-        	if(maxValue<d.temperature) maxValue = d.temperature;
+        if (!maxValue) {
+          maxValue = d.temperature;
+        } else {
+          if (maxValue < d.temperature) maxValue = d.temperature;
         }
       });
-    
-    // console.log(JSON.stringify(subset, null, 2))
 
-    // Reformat data to make it more copasetic for d3
-    // data = An array of objects
-    // concentrations = An array of three objects, each of which contains an array of objects
-    var concentrations = productCategories.map(function(category){
-      return {category: category, datapoints: subset.map(function(d){
-        return {date: d["time"], concentration: +d[category]}
-      })}
-    })
-    // console.log(JSON.stringify(concentrations, null, 2)) // to view the structure
+      // console.log(JSON.stringify(subset, null, 2))
 
-    // Set the domain of the axes
-    xScale.domain(d3.extent(subset, function(d) {return d["time"]; }));
+      // Reformat data to make it more copasetic for d3
+      // data = An array of objects
+      // concentrations = An array of three objects, each of which contains an array of objects
+      var concentrations = productCategories.map(function (category) {
+        return {
+          category: category, datapoints: subset.map(function (d) {
+            return { date: d["time"], concentration: +d[category] }
+          })
+        }
+      })
+      // console.log(JSON.stringify(concentrations, null, 2)) // to view the structure
 
-    yScale.domain([minValue, maxValue]);
+      // Set the domain of the axes
+      xScale.domain(d3.extent(subset, function (d) { return d["time"]; }));
 
-    // Place the axes on the chart
-    svg.append("g")
+      yScale.domain([minValue, maxValue]);
+
+      // Place the axes on the chart
+      svg.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + height + ")")
         .call(xAxis);
 
-    svg.append("g")
+      svg.append("g")
         .attr("class", "y axis")
         .call(yAxis)
-      .append("text")
+        .append("text")
         .attr("class", "label")
         .attr("y", 6)
         .attr("dy", ".71em")
@@ -197,27 +199,27 @@ applyStats = function(data){
         .style("text-anchor", "beginning")
         .text("Product Concentration");
 
-    var products = svg.selectAll(".category")
-          .data(concentrations)
-          .enter().append("g")
-          .attr("class", "category");
+      var products = svg.selectAll(".category")
+        .data(concentrations)
+        .enter().append("g")
+        .attr("class", "category");
 
-    products.append("path")
-            .attr("class", "line")
-            .attr("d", function(d) {return line(d.datapoints); })
-            .style("stroke", function(d) {return color(d.category); });
+      products.append("path")
+        .attr("class", "line")
+        .attr("d", function (d) { return line(d.datapoints); })
+        .style("stroke", function (d) { return color(d.category); });
 
       // console.log(JSON.stringify(d3.values(concentrations), null, 2)) // to view the structure
       console.log(d3.values(concentrations)); // to view the structure
       console.log(concentrations);
       // console.log(concentrations.map(function()))
-};
-    
+    };
+
 
     // Define responsive behavior
     function resize() {
       var width = parseInt(d3.select("#chart").style("width")) - margin.left - margin.right,
-      height = parseInt(d3.select("#chart").style("height")) - margin.top - margin.bottom;
+        height = parseInt(d3.select("#chart").style("height")) - margin.top - margin.bottom;
 
       // Update the range of the scale with new width/height
       xScale.range([0, width]);
@@ -233,11 +235,11 @@ applyStats = function(data){
 
       // Force D3 to recalculate and update the line
       svg.selectAll('.line')
-        .attr("d", function(d) { return line(d.datapoints); });
+        .attr("d", function (d) { return line(d.datapoints); });
 
       // Update the tick marks
-      xAxis.ticks(Math.max(width/75, 2));
-      yAxis.ticks(Math.max(height/50, 2));
+      xAxis.ticks(Math.max(width / 75, 2));
+      yAxis.ticks(Math.max(height / 50, 2));
 
     };
 
