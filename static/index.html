@@ -26,6 +26,10 @@
 </style>
 
 <body>
+  <select id="information">
+    <option value="temperature">temp</option>
+    <option value="humidity">humidité</option>
+  </select>
   <svg id="chart"></svg>
   <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
   <script src="http://d3js.org/d3.v3.js"></script>
@@ -39,7 +43,11 @@
     // Define date parser
     var parseDate = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
 
+    $('#information option[value="temperature"]').prop('selected', true);
+    var refValueLibelle = $('#information').val();
+
     // Define scales
+    var wholeContent = [];
     var xScale = d3.time.scale().range([0, width]);
     var yScale = d3.scale.linear().range([height, 0]);
     var color = d3.scale.ordinal()
@@ -71,13 +79,13 @@
       };
 
 
-      var wholeContent = [];
       var currentDate = new Date();
       var minDate = new Date();
       minDate.setDate(minDate.getDate() - 4);
 
       loadDay = function (datez) {
         var mFormat = d3.time.format("%Y%m%d");
+        console.log(mFormat(datez));
         $.ajax({
           url: './results/meteo' + mFormat(datez) + '.json',
           accepts: {
@@ -96,6 +104,7 @@
                   delete o.battery;
                   delete o.test;
                   o.temperature = (o.temperature - 32) / 1.8;
+                  o.refValue = 0;
                   res.push(o);
                 }
               } catch (e) {
@@ -122,6 +131,11 @@
       };
       loadDay(currentDate);
 
+      $('#information').on('change', function(){
+        refValueLibelle = $('#information').val();
+        applyStats(wholeContent);
+      });
+
       var renderDates = function (a, b) {
         wholeContent.sort(function (a, b) {
           return parseDate(a["time"]) - parseDate(b["time"]);
@@ -133,7 +147,9 @@
 
     applyStats = function (data) {
       // Set the color domain equal to the three product categories
-      var productCategories = d3.keys(data[0]).filter(function (key) { return (key !== "time") && (key !== "model") })
+      var productCategories = d3.keys(data[0]).filter(function (key) { return (key !== "time") && (key !== "model") 
+      && (key !== "temperature")
+      && (key !== "humidity") })
       color.domain(productCategories);
 
       // console.log(JSON.stringify(data, null, 2)) // to view the structure
@@ -148,18 +164,26 @@
         return (el.model === "LaCrosse TX141TH-Bv2 sensor"
           && el.id === 69)
       });
+      var temps = [];
       subset.forEach(function (d) {
-        d["time"] = parseDate(d["time"]);
-        delete d.id;
+        var dtime = parseDate(d["time"]);
+        var refValue = d[refValueLibelle];
+        
+        var tt = {
+          model : d.model,
+          refValue : refValue,
+          time : dtime
+        };
+        temps.push(tt);
         if (!minValue) {
-          minValue = d.temperature;
+          minValue = refValue;
         } else {
-          if (minValue > d.temperature) minValue = d.temperature;
+          if (minValue > refValue) minValue = refValue;
         }
         if (!maxValue) {
-          maxValue = d.temperature;
+          maxValue = refValue;
         } else {
-          if (maxValue < d.temperature) maxValue = d.temperature;
+          if (maxValue < refValue) maxValue = refValue;
         }
       });
 
@@ -170,7 +194,7 @@
       // concentrations = An array of three objects, each of which contains an array of objects
       var concentrations = productCategories.map(function (category) {
         return {
-          category: category, datapoints: subset.map(function (d) {
+          category: category, datapoints: temps.map(function (d) {
             return { date: d["time"], concentration: +d[category] }
           })
         }
@@ -178,9 +202,9 @@
       // console.log(JSON.stringify(concentrations, null, 2)) // to view the structure
 
       // Set the domain of the axes
-      xScale.domain(d3.extent(subset, function (d) { return d["time"]; }));
+      xScale.domain(d3.extent(temps, function (d) { return d["time"]; }));
 
-      yScale.domain([minValue, maxValue]);
+      yScale.domain([-10, 100]);
 
       // Place the axes on the chart
       svg.append("g")
