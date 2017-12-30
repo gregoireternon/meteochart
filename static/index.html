@@ -11,6 +11,17 @@
     stroke: #000;
     shape-rendering: crispEdges;
   }
+  div{
+    margin: 0px;
+    padding: 0px;
+  }
+  label{
+    font-size: 14px;
+    white-space: nowrap;
+    align-content: center;
+    vertical-align: middle;
+    align-self: center;
+  }
 
   .line {
     fill: none;
@@ -21,16 +32,38 @@
   #chart {
     width: 100%;
     height: 100%;
-    position: absolute;
+    position: relative;
   }
+
 </style>
 
 <body>
-  <select id="information">
-    <option value="temperature">temp</option>
-    <option value="humidity">humidité</option>
-  </select>
-  <svg id="chart"></svg>
+  <div style="height:100%; width:100%;display: flex;flex-direction:column;position:absolute;">
+      <div style="height: 60px;width: 100%;display:flex;flex-direction: row;justify-content:space-between;">
+        <div class="headerField">
+          <label for="information" > Choisissez votrre valeur:</label>
+          <select id="information">
+            <option value="temperature">temp</option>
+            <option value="humidity">humidité</option>
+          </select>
+        </div>
+        <div>
+            <label for="nbDays" > Nombre de jours glissants:</label>
+            <input id="nbDays" type="text" value="4">
+        </div>
+        <div>
+            <label for="currentTemp" > Temperature courante:</label>
+            <input id="currentTemp" type="text" >
+          </div>
+        <div>
+            <label for="currentHumidity" > Humidité:</label>
+            <input id="currentHumidity" type="text" >
+          </div>
+      </div>
+      <div style="flex:1">
+          <svg id="chart"></svg>
+      </div>
+  </div>
   <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
   <script src="http://d3js.org/d3.v3.js"></script>
   <script>
@@ -42,9 +75,12 @@
 
     // Define date parser
     var parseDate = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
+    var xAxisRef;
+    var yAxisRef;
 
     $('#information option[value="temperature"]').prop('selected', true);
     var refValueLibelle = $('#information').val();
+    var nbDays = $('#nbDays').val();
 
     // Define scales
     var wholeContent = [];
@@ -56,6 +92,7 @@
     // Define axes
     var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
     var yAxis = d3.svg.axis().scale(yScale).orient("left");
+    var maxDateObj={};
 
     // Define lines
     var line = d3.svg.line().interpolate("basis")
@@ -82,6 +119,7 @@
       var currentDate = new Date();
       var minDate = new Date();
       minDate.setDate(minDate.getDate() - 4);
+      
 
       loadDay = function (datez) {
         var mFormat = d3.time.format("%Y%m%d");
@@ -119,13 +157,13 @@
             var otherDatez = new Date(datez.getTime());
             otherDatez.setDate(otherDatez.getDate() - 1);
             if (otherDatez.getTime() < minDate.getTime()) {
-              renderDates(a, b);
+              applyStats(wholeContent);
             } else {
               loadDay(otherDatez);
             }
           },
           error: function (a, b, c) {
-            renderDates(a, b);
+            applyStats(wholeContent);
           }
         });
       };
@@ -133,24 +171,33 @@
 
       $('#information').on('change', function(){
         refValueLibelle = $('#information').val();
+        //alert('zeze');
         applyStats(wholeContent);
+        resize();
+      });
+      $('#nbDays').on('change', function(){
+        nbDays = $('#nbDays').val();
+        minDate = new Date();
+        wholeContent = [];
+        minDate.setDate(minDate.getDate() - nbDays);
+        //alert('zeze');
+        loadDay(currentDate);
+        resize();
       });
 
-      var renderDates = function (a, b) {
-        wholeContent.sort(function (a, b) {
-          return parseDate(a["time"]) - parseDate(b["time"]);
-        });
-        applyStats(wholeContent);
-      };
 
     });
 
     applyStats = function (data) {
+      wholeContent.sort(function (a, b) {
+          return parseDate(a["time"]) - parseDate(b["time"]);
+        });
       // Set the color domain equal to the three product categories
       var productCategories = d3.keys(data[0]).filter(function (key) { return (key !== "time") && (key !== "model") 
       && (key !== "temperature")
       && (key !== "humidity") })
       color.domain(productCategories);
+      svg.selectAll(".category").remove();
 
       // console.log(JSON.stringify(data, null, 2)) // to view the structure
 
@@ -167,6 +214,14 @@
       var temps = [];
       subset.forEach(function (d) {
         var dtime = parseDate(d["time"]);
+        if(maxDateObj !== 'undefined'
+         || maxDateObj.time<dtime){
+          maxDateObj={
+            time:dtime,
+            temperature:d.temperature,
+            humidity:d.humidity
+          };
+        }
         var refValue = d[refValueLibelle];
         
         var tt = {
@@ -204,24 +259,29 @@
       // Set the domain of the axes
       xScale.domain(d3.extent(temps, function (d) { return d["time"]; }));
 
-      yScale.domain([-10, 100]);
+      yScale.domain([minValue - 2 , maxValue + 2]);
 
+      if(xAxisRef){
+        xAxisRef.remove();
+        yAxisRef.remove();
+      }
+      
       // Place the axes on the chart
-      svg.append("g")
+      xAxisRef = svg.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + height + ")")
         .call(xAxis);
 
-      svg.append("g")
+      yAxisRef = svg.append("g")
         .attr("class", "y axis")
-        .call(yAxis)
-        .append("text")
+        .call(yAxis);
+      yAxisRef.append("text")
         .attr("class", "label")
         .attr("y", 6)
         .attr("dy", ".71em")
         .attr("dx", ".71em")
         .style("text-anchor", "beginning")
-        .text("Product Concentration");
+        .text("Valeur");
 
       var products = svg.selectAll(".category")
         .data(concentrations)
@@ -236,6 +296,8 @@
       // console.log(JSON.stringify(d3.values(concentrations), null, 2)) // to view the structure
       console.log(d3.values(concentrations)); // to view the structure
       console.log(concentrations);
+      $("#currentTemp").val(maxDateObj.temperature);
+      $("#currentHumidity").val(maxDateObj.humidity);
       // console.log(concentrations.map(function()))
     };
 
