@@ -141,7 +141,7 @@
                   //delete o.id;
                   delete o.battery;
                   delete o.test;
-                  o.temperature = (o.temperature - 32) / 1.8;
+                  o.temperature = o.temperature_C;
                   o.refValue = 0;
                   res.push(o);
                 }
@@ -208,8 +208,8 @@
       var minValue = null;
       var maxValue = null;
       var subset = data.filter(function (el) {
-        return (el.model === "LaCrosse TX141TH-Bv2 sensor"
-          && el.id === 69)
+        return (el.model === "Bresser-5in1"
+          && el.id === 183)
       });
       var temps = [];
       subset.forEach(function (d) {
