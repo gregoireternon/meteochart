@@ -45,6 +45,11 @@
           <select id="information">
             <option value="temperature">temp</option>
             <option value="humidity">humidité</option>
+            <option value="wind_speed">Vitesse du vent (m/s)</option>
+            <option value="wind_gust">Rafales (m/s)</option>
+            <option value="rain_mm">Pluviometrie (mm)</option>
+            <option value="wind_dir_deg">Direction du vent</option>
+            
           </select>
         </div>
         <div>
@@ -58,6 +63,10 @@
         <div>
             <label for="currentHumidity" > Humidité:</label>
             <input id="currentHumidity" type="text" >
+          </div>
+          <div>
+            <label for="currentWind" > Vitesse du vent:</label>
+            <input id="currentWind" type="text" >
           </div>
       </div>
       <div style="flex:1">
@@ -298,6 +307,7 @@
       console.log(concentrations);
       $("#currentTemp").val(maxDateObj.temperature);
       $("#currentHumidity").val(maxDateObj.humidity);
+      $("#currentWind").val(maxDateObj.wind_speed);
       // console.log(concentrations.map(function()))
     };
 
