@@ -35,12 +35,18 @@
     position: relative;
   }
 
+  .headerCell{
+    width:12%;
+    min-width:200px;
+  
+  }
+
 </style>
 
 <body>
   <div style="height:100%; width:100%;display: flex;flex-direction:column;position:absolute;">
-      <div style="height: 60px;width: 100%;display:flex;flex-direction: row;justify-content:space-between;">
-        <div class="headerField">
+      <div style="width: 100%;display:flex;flex-direction: row;justify-content:space-between;flex-wrap: wrap;">
+        <div class="headerCell">
           <label for="information" > Choisissez votrre valeur:</label>
           <select id="information">
             <option value="temperature">temp</option>
@@ -52,21 +58,33 @@
             
           </select>
         </div>
-        <div>
+        <div class="headerCell">
             <label for="nbDays" > Nombre de jours glissants:</label>
             <input id="nbDays" type="text" value="4">
         </div>
-        <div>
-            <label for="currentTemp" > Temperature courante:</label>
+        <div class="headerCell">
+            <label for="currentTemp" > Temperature courante (°C):</label>
             <input id="currentTemp" type="text" >
           </div>
-        <div>
-            <label for="currentHumidity" > Humidité:</label>
+        <div class="headerCell">
+            <label for="currentHumidity" > Humidité (%):</label>
             <input id="currentHumidity" type="text" >
           </div>
-          <div>
-            <label for="currentWind" > Vitesse du vent:</label>
+          <div class="headerCell">
+            <label for="currentWind" > Vitesse du vent (m/s):</label>
             <input id="currentWind" type="text" >
+          </div>
+          <div class="headerCell">
+            <label for="currentGust" > Vitesse des rafales:</label>
+            <input id="currentGust" type="text" >
+          </div>
+          <div class="headerCell">
+            <label for="currentDeg" > Orientation du vent (deg):</label>
+            <input id="currentDeg" type="text" >
+          </div>
+          <div class="headerCell">
+            <label for="currentRain" > Précipitation (mm):</label>
+            <input id="currentRain" type="text" >
           </div>
       </div>
       <div style="flex:1">
@@ -228,7 +246,11 @@
           maxDateObj={
             time:dtime,
             temperature:d.temperature,
-            humidity:d.humidity
+            humidity:d.humidity,
+            wind_speed:d.wind_speed,
+            wind_gust:d.wind_gust,
+            wind_dir_deg:d.wind_dir_deg,
+            rain_mm:d.rain_mm
           };
         }
         var refValue = d[refValueLibelle];
@@ -308,6 +330,9 @@
       $("#currentTemp").val(maxDateObj.temperature);
       $("#currentHumidity").val(maxDateObj.humidity);
       $("#currentWind").val(maxDateObj.wind_speed);
+      $("#currentGust").val(maxDateObj.wind_gust);
+      $("#currentDeg").val(maxDateObj.wind_dir_deg);
+      $("#currentRain").val(maxDateObj.rain_mm);
       // console.log(concentrations.map(function()))
     };
 
