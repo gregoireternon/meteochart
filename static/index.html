@@ -47,7 +47,14 @@
   <div style="height:100%; width:100%;display: flex;flex-direction:column;position:absolute;">
       <div style="width: 100%;display:flex;flex-direction: row;justify-content:space-between;flex-wrap: wrap;">
         <div class="headerCell">
-          <label for="information" > Choisissez votrre valeur:</label>
+          <label for="sourceProbe" > Choisissez votre sonde:</label>
+          <select id="sourceProbe">
+            <option value="Bresser-5in1">Bresser</option>
+            <option value="LaCrosse TX141TH-Bv2 sensor">LaCrosse</option>
+          </select>
+        </div>
+        <div class="headerCell">
+          <label for="information" > Choisissez votre valeur:</label>
           <select id="information">
             <option value="temperature">temp</option>
             <option value="humidity">humidité</option>
@@ -106,7 +113,20 @@
     var yAxisRef;
 
     $('#information option[value="temperature"]').prop('selected', true);
+    $('#sourceProbe option[value="Bresser-5in1"]').prop('selected', true);
     var refValueLibelle = $('#information').val();
+    var refSourceProbe = $('#sourceProbe').val();
+
+    var sourceProbeCheck = [];
+    sourceProbeCheck['Bresser-5in1'] = function (el) {
+        return (el.model === "Bresser-5in1"
+          && (el.id === 183 || el.id === 93))
+    };
+    sourceProbeCheck['LaCrosse TX141TH-Bv2 sensor'] = function (el) {
+        return (el.model === "LaCrosse TX141TH-Bv2 sensor"
+          && (el.id === 50))
+    };
+
     var nbDays = $('#nbDays').val();
 
     // Define scales
@@ -202,6 +222,12 @@
         applyStats(wholeContent);
         resize();
       });
+      $('#sourceProbe').on('change', function(){
+        refSourceProbe = $('#sourceProbe').val();
+        //alert('zeze');
+        applyStats(wholeContent);
+        resize();
+      });
       $('#nbDays').on('change', function(){
         nbDays = $('#nbDays').val();
         minDate = new Date();
@@ -234,10 +260,7 @@
 
       var minValue = null;
       var maxValue = null;
-      var subset = data.filter(function (el) {
-        return (el.model === "Bresser-5in1"
-          && (el.id === 183 || el.id === 93))
-      });
+      var subset = data.filter(sourceProbeCheck[refSourceProbe]);
       var temps = [];
       subset.forEach(function (d) {
         var dtime = parseDate(d["time"]);
