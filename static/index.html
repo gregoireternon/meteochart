@@ -65,33 +65,33 @@
             
           </select>
         </div>
-        <div class="headerCell">
-            <label for="nbDays" > Nombre de jours glissants:</label>
-            <input id="nbDays" type="text" value="4">
-        </div>
-        <div class="headerCell">
-            <label for="currentTemp" > Temperature courante (°C):</label>
-            <input id="currentTemp" type="text" >
-          </div>
-        <div class="headerCell">
-            <label for="currentHumidity" > Humidité (%):</label>
-            <input id="currentHumidity" type="text" >
-          </div>
-          <div class="headerCell">
-            <label for="currentWind" > Vitesse du vent (m/s):</label>
-            <input id="currentWind" type="text" >
-          </div>
-          <div class="headerCell">
-            <label for="currentGust" > Vitesse des rafales:</label>
-            <input id="currentGust" type="text" >
-          </div>
-          <div class="headerCell">
-            <label for="currentDeg" > Orientation du vent (deg):</label>
-            <input id="currentDeg" type="text" >
-          </div>
-          <div class="headerCell">
-            <label for="currentRain" > Précipitation (mm):</label>
-            <input id="currentRain" type="text" >
+          <div>
+            <table>
+              <tr>
+                <td><label for="nbDays" > Nombre de jours glissants:</label></td>
+                <td><input id="nbDays" type="text" value="4"></td>
+                <td><label for="heureMesure" > heure de la mesure:</label></td>
+                <td><input id="heureMesure" type="text" ></td>
+              </tr>
+              <tr>
+                <td><label for="currentTemp" > Temperature courante (°C):</label></td>
+                <td><input id="currentTemp" type="text" ></td>
+                <td><label for="currentHumidity" > Humidité (%):</label></td>
+                <td><input id="currentHumidity" type="text" ></td>
+              </tr>
+              <tr>
+                <td><label for="currentWind" > Vitesse du vent (m/s):</label></td>
+                <td><input id="currentWind" type="text" ></td>
+                <td> <label for="currentGust" > Vitesse des rafales:</label></td>
+                <td><input id="currentGust" type="text" ></td>
+              </tr>
+              <tr>
+                <td><label for="currentDeg" > Orientation du vent (deg):</label></td>
+                <td><input id="currentDeg" type="text" ></td>
+                <td><label for="currentRain" > Précipitation (mm):</label></td>
+                <td><input id="currentRain" type="text" ></td>
+              </tr>
+            </table>
           </div>
       </div>
       <div style="flex:1">
@@ -124,7 +124,7 @@
     };
     sourceProbeCheck['LaCrosse TX141TH-Bv2 sensor'] = function (el) {
         return (el.model === "LaCrosse TX141TH-Bv2 sensor"
-          && (el.id === 50))
+          && (el.id === 50 || el.id === 204))
     };
 
     var nbDays = $('#nbDays').val();
@@ -350,6 +350,9 @@
       // console.log(JSON.stringify(d3.values(concentrations), null, 2)) // to view the structure
       console.log(d3.values(concentrations)); // to view the structure
       console.log(concentrations);
+      var hr = maxDateObj.time.getHours();
+      var mn = maxDateObj.time.getMinutes();
+      $("#heureMesure").val(hr+ ":"+ (mn < 10 ? '0'+mn : mn));
       $("#currentTemp").val(maxDateObj.temperature);
       $("#currentHumidity").val(maxDateObj.humidity);
       $("#currentWind").val(maxDateObj.wind_speed);
