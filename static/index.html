@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<head>
+<!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
 <meta charset="utf-8">
 <style>
   body {
@@ -38,10 +40,11 @@
   .headerCell{
     width:12%;
     min-width:200px;
-  
-  }
 
+  }
 </style>
+
+</head>
 
 <body>
   <div style="height:100%; width:100%;display: flex;flex-direction:column;position:absolute;">
@@ -49,8 +52,9 @@
         <div class="headerCell">
           <label for="sourceProbe" > Choisissez votre sonde:</label>
           <select id="sourceProbe">
+            <option value="LaCrosse TX141TH-Bv2 sensor">Serre</option>
+            <option value="LaCrosse-TX141Bv2 sensor">Extérieur</option>
             <option value="Bresser-5in1">Bresser</option>
-            <option value="LaCrosse TX141TH-Bv2 sensor">LaCrosse</option>
           </select>
         </div>
         <div class="headerCell">
@@ -113,19 +117,24 @@
     var yAxisRef;
 
     $('#information option[value="temperature"]').prop('selected', true);
-    $('#sourceProbe option[value="Bresser-5in1"]').prop('selected', true);
+    $('#sourceProbe option[value="LaCrosse TX141TH-Bv2 sensor"]').prop('selected', true);
     var refValueLibelle = $('#information').val();
     var refSourceProbe = $('#sourceProbe').val();
 
     var sourceProbeCheck = [];
     sourceProbeCheck['Bresser-5in1'] = function (el) {
         return (el.model === "Bresser-5in1"
-          && (el.id === 183 || el.id === 93))
+          && (el.id === 183 || el.id === 93 || el.id === 91 || el.id === 154 || el.id === 109))
     };
     sourceProbeCheck['LaCrosse TX141TH-Bv2 sensor'] = function (el) {
-        return (el.model === "LaCrosse TX141TH-Bv2 sensor"
-          && (el.id === 50 || el.id === 204 || el.id === 226))
+        return (el.model === "LaCrosse TX141TH-Bv2 sensor" || el.model === "LaCrosse-TX141THBv2"
+          && (el.id === 50 || el.id === 204 || el.id === 226 || el.id === 6 || el.id === 49))
     };
+    sourceProbeCheck['LaCrosse-TX141Bv2 sensor'] = function (el) {
+        return (el.model === "LaCrosse-TX141Bv2 sensor" || el.model === "LaCrosse-TX141Bv2"
+          && (el.id === 131))
+    };
+    
 
     var nbDays = $('#nbDays').val();
 
@@ -189,6 +198,10 @@
                   delete o.battery;
                   delete o.test;
                   o.temperature = o.temperature_C;
+		  o.wind_speed = (o.wind_speed)?(o.wind_speed):(o.wind_avg_m_s)
+		  if(o.wind_speed===undefined) o.wind_speed=0; 
+		  o.wind_gust = (o.wind_gust)?(o.wind_gust):(o.wind_max_m_s)
+		  if(o.wind_gust===undefined) o.wind_gust=0;
                   o.refValue = 0;
                   res.push(o);
                 }
@@ -270,8 +283,8 @@
             time:dtime,
             temperature:d.temperature,
             humidity:d.humidity,
-            wind_speed:d.wind_speed,
-            wind_gust:d.wind_gust,
+            wind_speed:(d.wind_speed)?(d.wind_speed):(d.wind_avg_m_s),
+            wind_gust:(d.wind_gust)?(d.wind_gust):(d.wind_max_m_s),
             wind_dir_deg:d.wind_dir_deg,
             rain_mm:d.rain_mm
           };
