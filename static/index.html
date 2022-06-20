@@ -54,6 +54,7 @@
           <select id="sourceProbe">
             <option value="LaCrosse TX141TH-Bv2 sensor">Serre</option>
             <option value="LaCrosse-TX141Bv2 sensor">Extérieur</option>
+            <option value="LaCrosse-TX34IT sensor">Pluie</option>
             <option value="Bresser-5in1">Bresser</option>
           </select>
         </div>
@@ -134,6 +135,10 @@
         return (el.model === "LaCrosse-TX141Bv2 sensor" || el.model === "LaCrosse-TX141Bv2"
           && (el.id === 131))
     };
+    sourceProbeCheck['LaCrosse-TX34IT sensor'] = function (el) {
+        return (el.model === "LaCrosse-TX34IT sensor" || el.model === "LaCrosse-TX34IT")
+    };
+    
     
     
 
@@ -238,9 +243,13 @@
       });
       $('#sourceProbe').on('change', function(){
         refSourceProbe = $('#sourceProbe').val();
-        //alert('zeze');
+        if(refSourceProbe == "LaCrosse-TX34IT sensor"){
+          $('#information').val('rain_mm');
+          refValueLibelle = 'rain_mm';
+        }
         applyStats(wholeContent);
         resize();
+        //alert('zeze');
       });
       $('#nbDays').on('change', function(){
         nbDays = $('#nbDays').val();
@@ -260,9 +269,7 @@
           return parseDate(a["time"]) - parseDate(b["time"]);
         });
       // Set the color domain equal to the three product categories
-      var productCategories = d3.keys(data[0]).filter(function (key) { return (key !== "time") && (key !== "model") 
-      && (key !== "temperature")
-      && (key !== "humidity") })
+      var productCategories = d3.keys(data[0]).filter(function (key) { return (key !== "time") && (key !== "model")  })
       color.domain(productCategories);
       svg.selectAll(".category").remove();
 
